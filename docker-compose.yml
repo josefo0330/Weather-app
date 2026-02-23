@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  react-app:
+    build: .
+    restart: always
+    expose:
+      - "80"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.react.rule=Host(`tudominio.com`)
+      - traefik.http.services.react.loadbalancer.server.port=80
