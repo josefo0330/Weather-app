@@ -1,5 +1,13 @@
 import '../index.css';
-const CurrentWeather = ({data}) => {
+interface CurrentWeatherProps {
+    data: {
+        name: string;
+        main: { temp: number; feels_like: number; humidity: number };
+        weather: { main: string }[];
+        wind: { speed: number };
+    };
+}
+const CurrentWeather = ({data}: CurrentWeatherProps) => {
     return (
         <div className="current-weather">
       <div className="container"> 
