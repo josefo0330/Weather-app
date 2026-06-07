@@ -2,11 +2,19 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import CurrentWeather from './components/CurrentWeather';
 import ForecastWeather from './components/ForecastWeather';
+import HourlyForescast from './components/HourlyForescast';
 
 type ForecastItem = {
   date: string;
   temp: number;
   weather: { main: string; description: string; icon: string }[];
+};
+
+type HourlyItem = {
+  time: string;
+  temp: number;
+  weather: string;
+  icon: string;
 };
 
 function App() {
@@ -17,6 +25,7 @@ function App() {
     wind: { speed: 0 }
   });
   const [forecast, setForecast] = useState<ForecastItem[]>([]);
+  const [hourly, setHourly] = useState<HourlyItem[]>([]);
   const [location, setLocation] = useState('Panama');
 
   const buildUrl = (city: string) =>
@@ -27,6 +36,7 @@ function App() {
   const fetchForecast = async (city: string) => {
     try {
       const response2 = await axios.get(buildUrl2(city));
+      const tzOffset = response2.data.city?.timezone || 0;
       const items = response2.data.list || [];
       const dailyForecast: ForecastItem[] = [];
       const seenDates = new Set<string>();
@@ -38,7 +48,7 @@ function App() {
         }
         seenDates.add(date);
         dailyForecast.push({
-          date: new Date(item.dt_txt).toLocaleDateString('es-ES', {
+          date: new Date((item.dt + tzOffset) * 1000).toLocaleDateString('es-ES', {
             weekday: 'short',
             day: 'numeric',
             month: 'short'
@@ -51,10 +61,48 @@ function App() {
         }
       }
 
+      const activeDate = items.length > 0 ? new Date((items[0].dt + tzOffset) * 1000).getUTCDate() : null;
+      const hourlyForecast: HourlyItem[] = [];
+
+      for (const item of items) {
+        if (hourlyForecast.length >= 24) {
+          break;
+        }
+        const itemDate = new Date((item.dt + tzOffset) * 1000).getUTCDate();
+        if (activeDate !== null && itemDate !== activeDate) {
+          continue;
+        }
+
+        hourlyForecast.push({
+          time: new Date((item.dt + tzOffset) * 1000).toLocaleTimeString('es-ES', {
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
+          temp: item.main.temp,
+          weather: item.weather[0]?.main || '',
+          icon: item.weather[0]?.icon || ''
+        });
+      }
+
+      if (hourlyForecast.length === 0) {
+        setHourly(items.slice(0, 8).map((item: any) => ({
+          time: new Date((item.dt + tzOffset) * 1000).toLocaleTimeString('es-ES', {
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
+          temp: item.main.temp,
+          weather: item.weather[0]?.main || '',
+          icon: item.weather[0]?.icon || ''
+        })));
+      } else {
+        setHourly(hourlyForecast);
+      }
+
       setForecast(dailyForecast);
     } catch (error) {
       console.error('Error fetching forecast:', error);
       setForecast([]);
+      setHourly([]);
     }
   };
 
@@ -97,6 +145,7 @@ function App() {
         <CurrentWeather data={data} />
         <ForecastWeather forecast={forecast} />
       </div>
+      <HourlyForescast hourly={hourly} />
     </div>
   );
 }
