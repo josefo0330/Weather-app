@@ -12,8 +12,8 @@ interface CurrentWeatherProps {
     };
 }
 
-const dayNames = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
-const monthNames = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function formatLocalDateTime(baseTime?: number, tz?: number) {
     if (!baseTime || baseTime === 0) return '';
