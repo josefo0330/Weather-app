@@ -48,7 +48,7 @@ function App() {
         }
         seenDates.add(date);
         dailyForecast.push({
-          date: new Date((item.dt + tzOffset) * 1000).toLocaleDateString('es-ES', {
+          date: new Date((item.dt + tzOffset) * 1000).toLocaleDateString('en-US', {
             weekday: 'short',
             day: 'numeric',
             month: 'short'
