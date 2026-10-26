@@ -22,20 +22,50 @@ h1{
   width: 100%;
   min-height: 100vh;
   position: relative;
-  background-color: rgba(0, 0, 0,0.4);
+  isolation: isolate;
+  background-color: #172033;
   color: white;
   overflow: hidden;
 }
-.app:before {
-  content: '';
-  background-image: url('./assets/noche-despejada.jpg');
+.weather-backdrop {
   background-position: center center;
   background-size: cover;
   background-repeat: no-repeat;
-  filter: brightness(0.55);
   position: absolute;
   inset: 0;
   z-index: -1;
+  filter: brightness(.82);
+}
+.time-night .weather-backdrop {
+  filter: brightness(.62);
+}
+.scene-clear.time-day .weather-backdrop {
+  background-image: url('./assets/Soleado.jpg');
+}
+.scene-clear.time-night .weather-backdrop {
+  background-image: url('./assets/noche-despejada.jpg');
+}
+.scene-rain .weather-backdrop,
+.scene-storm .weather-backdrop {
+  background-image: url('./assets/dia lluvioso.jpg');
+}
+.scene-rain.time-night .weather-backdrop,
+.scene-storm.time-night .weather-backdrop {
+  background-image: url('./assets/Lluvioso-noche.jpg');
+}
+.scene-clouds.time-day .weather-backdrop,
+.scene-mist.time-day .weather-backdrop {
+  background-image: url('./assets/nublado dia.jpg');
+}
+.scene-clouds.time-night .weather-backdrop,
+.scene-mist.time-night .weather-backdrop {
+  background-image: url('./assets/nublado noche.jpg');
+}
+.scene-snow .weather-backdrop {
+  background-image: url('./assets/dia nevado.avif');
+}
+.scene-snow.time-night .weather-backdrop {
+  background-image: url('./assets/noche nevada.avif');
 }
 .container{
   width: min(1120px, 100%);

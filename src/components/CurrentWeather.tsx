@@ -9,6 +9,7 @@ interface CurrentWeatherProps {
         wind: { speed: number };
         dt?: number;
         timezone?: number;
+        sys?: { sunrise?: number; sunset?: number };
     };
 }
 

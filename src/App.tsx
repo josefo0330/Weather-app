@@ -32,6 +32,16 @@ type ForecastApiItem = {
   weather: { main: string; description: string; icon: string }[];
 };
 
+type CurrentWeatherData = {
+  name: string;
+  main: { temp: number; feels_like: number; humidity: number };
+  weather: { main: string; description?: string; icon?: string }[];
+  wind: { speed: number };
+  dt?: number;
+  timezone?: number;
+  sys?: { sunrise?: number; sunset?: number };
+};
+
 type WeatherTarget = string | Pick<CitySuggestion, 'lat' | 'lon'>;
 
 const API_KEY = '68778de485940178d3cb0f39538d9039';
@@ -52,11 +62,12 @@ const buildGeoUrl = (city: string) =>
   `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=5&appid=${API_KEY}`;
 
 function App() {
-  const [data, setData] = useState({
+  const [data, setData] = useState<CurrentWeatherData>({
     name: '',
     main: { temp: 0, feels_like: 0, humidity: 0 },
     weather: [{ main: '' }],
-    wind: { speed: 0 }
+    wind: { speed: 0 },
+    sys: {}
   });
   const [forecast, setForecast] = useState<ForecastItem[]>([]);
   const [hourly, setHourly] = useState<HourlyItem[]>([]);
@@ -64,6 +75,26 @@ function App() {
   const [suggestions, setSuggestions] = useState<CitySuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [clockTick, setClockTick] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = window.setInterval(() => setClockTick(Date.now()), 60000);
+    return () => window.clearInterval(interval);
+  }, []);
+
+  const weatherMain = data.weather[0]?.main.toLowerCase() || 'clear';
+  const weatherScene = weatherMain.includes('thunder') ? 'storm' :
+    weatherMain.includes('rain') || weatherMain.includes('drizzle') ? 'rain' :
+    weatherMain.includes('snow') ? 'snow' :
+    weatherMain.includes('cloud') ? 'clouds' :
+    ['mist', 'fog', 'haze', 'smoke', 'dust', 'sand', 'ash', 'squall', 'tornado'].some((condition) => weatherMain.includes(condition)) ? 'mist' : 'clear';
+  const nowSeconds = Math.floor(clockTick / 1000);
+  const localHour = data.timezone !== undefined
+    ? new Date((nowSeconds + data.timezone) * 1000).getUTCHours()
+    : new Date().getHours();
+  const isNight = data.sys?.sunrise && data.sys?.sunset
+    ? nowSeconds < data.sys.sunrise || nowSeconds >= data.sys.sunset
+    : localHour < 6 || localHour >= 18;
 
   const fetchForecast = useCallback(async (target: WeatherTarget) => {
     try {
@@ -223,7 +254,8 @@ function App() {
   };
 
   return (
-    <div className="app">
+    <div className={`app scene-${weatherScene} ${isNight ? 'time-night' : 'time-day'}`}>
+      <div className="weather-backdrop" aria-hidden="true" />
       <div className="search">
         <input
           value={location}
